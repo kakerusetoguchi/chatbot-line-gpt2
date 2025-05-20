@@ -7,10 +7,12 @@ import os
 
 app = Flask(__name__)
 
-# 環境変数からキーを取得
+# OpenAI クライアント（v1.x用）
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# LINE Bot設定
 line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/")
 def home():
@@ -38,11 +40,11 @@ def handle_message(event):
     ]
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages
         )
-        reply_text = response["choices"][0]["message"]["content"]
+        reply_text = response.choices[0].message.content
     except Exception as e:
         reply_text = f"Error from OpenAI: {str(e)}"
 
